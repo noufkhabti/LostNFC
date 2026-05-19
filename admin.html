@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<base target="_top">
+<title>لوحة الإدارة</title>
+</head>
+
+<body>
+
+<h1>لوحة الإدارة</h1>
+
+<input
+  id="password"
+  type="password"
+  placeholder="الرقم السري">
+
+<button onclick="startAdmin()">
+دخول
+</button>
+
+<div id="result"></div>
+
+<script>
+
+let adminPassword = "";
+let currentUid = "";
+
+function startAdmin() {
+
+  adminPassword =
+    document.getElementById("password")
+    .value.trim();
+
+  loadLastScan();
+
+  setInterval(loadLastScan, 2000);
+}
+
+function loadLastScan() {
+
+  google.script.run
+
+    .withSuccessHandler(function(item) {
+
+      const result =
+        document.getElementById("result");
+
+      if (!item) {
+
+        result.innerHTML =
+          "بانتظار قراءة الشريحة";
+
+        return;
+      }
+
+      currentUid = item.uid;
+
+      result.innerHTML = `
+
+        <strong>اسم الطالبة:</strong>
+        ${item.name}<br>
+
+        <strong>المقتنى:</strong>
+        ${item.item}<br>
+
+        <strong>الحالة:</strong>
+        ${item.status}<br><br>
+
+        <button onclick="deliverItem()">
+        تم التسليم
+        </button>
+
+      `;
+    })
+
+    .getLastScannedItem(adminPassword);
+}
+
+function deliverItem() {
+
+  google.script.run
+
+    .withSuccessHandler(function(msg) {
+
+      document.getElementById("result")
+      .innerHTML = msg;
+
+    })
+
+    .markDelivered(currentUid, adminPassword);
+}
+
+</script>
+
+</body>
+</html>
